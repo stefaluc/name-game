@@ -1,0 +1,17 @@
+{
+  "name": "name-game",
+  "version": "1.0.0",
+  "author": "Lucas Stefanski",
+  "scripts": {
+    "server": "nodemon server.js",
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "express": "^4.16.2",
+    "path": "^0.12.7"
+  },
+  "devDependencies": {
+    "concurrently": "^3.5.0"
+  }
+}
