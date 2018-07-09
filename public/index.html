@@ -1,6 +1,38 @@
 <html>
-    <head></head>
+    <head>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.18.0/axios.min.js"></script>
+        <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+    </head>
     <body>
-        Hello World!
+        Enter Username:
+        <input id="nameinput" type="text" />
+        <button id="namebtn">Submit</button>
+        
+        <div id="game"></div>
+
+<script type="text/javascript">
+    var userId;
+    $('#namebtn').on('click', startGame);
+    function startGame() {
+        var name = $('#nameinput').val();
+        axios.post('/api/users', { name: name }).then(function (response) {
+            console.log(response);
+            userId = response.data.user.id;
+            console.log(userId);
+            axios.post('/api/users/' + userId + '/game').then(function (response) {
+                console.log(response);
+            });
+        })
+        .catch(function (error) {
+            console.log('error');
+            console.log(error);
+        });
+    }
+
+    function renderGame(profiles) {
+        
+    }
+</script>
+
     </body>
 </html>
