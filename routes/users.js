@@ -7,6 +7,9 @@ const router = express.Router();
 let users = [];
 let userIds = 0;
 
+// TODO: think about possibly adding /games route
+
+// ========== Basic user HTTP requests (/users) ==========
 // GET users
 router.get('/users', (req, res) => {
   res.send({ users });
@@ -14,26 +17,37 @@ router.get('/users', (req, res) => {
 
 // GET user by id
 router.get('/users/:id', (req, res) => {
+  // TODO: send not found status on invalid id
   const userById = users.find((user) => (user.id === Number(req.params.id)));
   res.send({ user: userById });
 });
 
 // POST user
 router.post('/users', (req, res) => {
-  let newUser = {
-    id: ++userIds,
-    name: req.body.name,
-    numWins: 0,
-    game: {},
-  };
+  const userByName = users.find((user) => (user.name === req.body.name));
+  if (userByName) {
+    // username already exists
+    res.send({ user: userByName });
+  } else {
+    let newUser = {
+      id: ++userIds,
+      name: req.body.name,
+      game: {},
+      stats: {
+        wins: 0,
+        gamesPlayed: 0,
+      },
+    };
 
-  users = [
-    ...users,
-    newUser,
-  ];
-  res.send({ user: newUser });
+    users = [
+      ...users,
+      newUser,
+    ];
+    res.send({ user: newUser });
+  }
 });
 
+// ========== User game HTTP requests (/users/:id/game) ==========
 // GET game session for a user
 router.get('/users/:id/game', (req, res) => {
   const userById = users.find((user) => (user.id === Number(req.params.id)));
@@ -44,7 +58,6 @@ router.get('/users/:id/game', (req, res) => {
 // POST new game session for a user
 router.post('/users/:id/game', (req, res) => {
   const newGame = {
-    numGuess: 0,
     numCorrect: 0,
     profiles: getProfiles(),
     lastGuess: null,
@@ -57,10 +70,13 @@ router.post('/users/:id/game', (req, res) => {
   res.send({ game: newGame });
 });
 
+// POST client guess
+// TODO: change guess to query param
 router.post('/users/:id/game/guess', (req, res) => {
   const userById = users.find((user) => (user.id === Number(req.params.id)));
+  userById.game.numGuesses++;
   if (req.body.guess === userById.game.answer.firstName + ' ' + userById.game.answer.lastName) {
-    userById.numWins++;
+    userById.stats.numWins++;
     res.send({ correct: true });
   } else {
     res.send({ correct: false });
@@ -87,5 +103,23 @@ function randInt(lower, upper) {
   let range = (upper - lower) + 1;
   return Math.floor(Math.random() * range) + lower;
 }
+
+// ========== User statistics HTTP requests (/users/:id/stats and /users/stats) ==========
+router.get('/users/:id/stats', (req, res) => {
+  const userById = users.find((user) => (user.id === Number(req.params.id)));
+  res.send({ stats: userById.stats });
+});
+
+// TODO: fix
+router.get('/users/stats', (req, res) => {
+  console.log('reached');
+  const allStats = users.map((user) => (user.stats));
+  console.log(allStats);
+  res.send({ stats: allStats });
+});
+
+// TODO: /users/stats?sort=(ascending|descending)
+//       /users/stats?type=(accuracy|speed|amount)
+//       /users/stats?limit=(0-stats.length)
 
 module.exports = router;

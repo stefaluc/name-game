@@ -8,29 +8,40 @@
             Enter Username:
             <input id="nameinput" type="text" />
             <button id="namebtn">Submit</button>
+            <div id="validation"></div>
         </div>
         
         <div id="game"></div>
+        <div style="color: blue; cursor: pointer; text-decoration: underline">
+            Click to view your stats
+        </div>
+        <div id="stats"></div>
+        <div style="color: blue; cursor: pointer; text-decoration: underline">
+            Click to view leader board
+        </div>
+        <div id="leaderboard"></div>
 
 <script type="text/javascript">
     var userId;
     var game;
-    $('#namebtn').on('click', startGame);
-    function startGame() {
+    $('#namebtn').on('click', login);
+    function login() {
         var name = $('#nameinput').val();
-        axios.post('/api/users', { name: name }).then(function (response) {
-            console.log(response);
-            userId = response.data.user.id;
-            console.log(userId);
-            axios.post('/api/users/' + userId + '/game').then(function (response) {
-                game = response.data.game;
-                $('#user').empty();
-                renderGame();
-            })
-            .catch(function (error) {
-                console.log('error');
-                console.log(error);
-            });
+        axios.post('/api/users', { name: name }).then(function (res) {
+            userId = res.data.user.id;
+            createGame();
+        })
+        .catch(function (error) {
+            console.log('error');
+            console.log(error);
+        });
+    }
+
+    function createGame() {
+        axios.post('/api/users/' + userId + '/game').then(function (res) {
+            game = res.data.game;
+            $('#user').empty();
+            renderGame();
         })
         .catch(function (error) {
             console.log('error');
@@ -53,14 +64,20 @@
             );
             i++;
         });
+        $('#game').append('<div id="correct"></div>');
     }
     
     function guess(img) {
         var guess = game.profiles[Number(img.id)].firstName + ' ' + game.profiles[Number(img.id)].lastName;
         console.log(guess);
         axios.post('/api/users/' + userId + '/game/guess', { guess: guess })
-        .then(function (response) {
-            console.log(response.data);
+        .then(function (res) {
+            console.log(res.data);
+            if (res.data.correct) {
+                createGame();
+            } else {
+                $('#correct').html('<span>Incorrect! Guess again</span>');
+            }
         }).catch(function (error) {
             console.log('error');
             console.log(error);
