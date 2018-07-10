@@ -12,11 +12,11 @@
         </div>
         
         <div id="game"></div>
-        <div style="color: blue; cursor: pointer; text-decoration: underline">
+        <div id="statsbtn" style="color: blue; cursor: pointer; text-decoration: underline">
             Click to view your stats
         </div>
         <div id="stats"></div>
-        <div style="color: blue; cursor: pointer; text-decoration: underline">
+        <div id="lbbtn" style="color: blue; cursor: pointer; text-decoration: underline">
             Click to view leader board
         </div>
         <div id="leaderboard"></div>
@@ -25,6 +25,9 @@
     var userId;
     var game;
     $('#namebtn').on('click', login);
+    $('#statsbtn').on('click', renderStats);
+    $('#lbbtn').on('click', renderLB);
+
     function login() {
         var name = $('#nameinput').val();
         axios.post('/api/users', { name: name }).then(function (res) {
@@ -70,7 +73,7 @@
     function guess(img) {
         var guess = game.profiles[Number(img.id)].firstName + ' ' + game.profiles[Number(img.id)].lastName;
         console.log(guess);
-        axios.post('/api/users/' + userId + '/game/guess', { guess: guess })
+        axios.post('/api/users/' + userId + '/game?guess=' + guess)
         .then(function (res) {
             console.log(res.data);
             if (res.data.correct) {
@@ -81,6 +84,30 @@
         }).catch(function (error) {
             console.log('error');
             console.log(error);
+        });
+    }
+
+    function renderStats() {
+        axios.get('/api/stats/' + userId).then(function (res) {
+            const stats = res.data.stats;
+            $('#stats').empty();
+            $('#stats').append(
+                '<div>Correct Guesses: ' + stats.correctGuesses + '</div>' +
+                '<div>Wrong Guesses: ' + stats.wrongGuesses + '</div>' +
+                '<div>Average finish time: ' + stats.avgFinishTime + '</div>'
+            );
+        });
+    }
+
+    function renderLB() {
+        axios.get('/api/stats').then(function (res) {
+            const stats = res.data.stats;
+            $('#leaderboard').empty();
+            $('#leaderboard').append(
+                '<div>Correct Guesses: ' + stats.correctGuesses + '</div>' +
+                '<div>Wrong Guesses: ' + stats.wrongGuesses + '</div>' +
+                '<div>Average finish time: ' + stats.avgFinishTime + '</div>'
+            );
         });
     }
 </script>
