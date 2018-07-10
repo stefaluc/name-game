@@ -23,6 +23,7 @@ router.post('/users', (req, res) => {
   let newUser = {
     id: ++userIds,
     name: req.body.name,
+    numWins: 0,
     game: {},
   };
 
@@ -40,23 +41,44 @@ router.get('/users/:id/game', (req, res) => {
   res.send({ game: userById.game });
 });
 
+// POST new game session for a user
 router.post('/users/:id/game', (req, res) => {
-  console.log(getProfiles());
-  const userById = users.find((user) => (user.id === Number(req.params.id)));
-  console.log(userById);
-  userById.game.numGuesses = 0;
-  userById.game.numCorrect = 0;
-  userById.game.profiles = getProfiles();
-  userById.game.answer = userById.game.profiles[randInt(0, 5)];
-  userById.game.lastGuess = null;
+  const newGame = {
+    numGuess: 0,
+    numCorrect: 0,
+    profiles: getProfiles(),
+    lastGuess: null,
+  };
+  newGame.answer = newGame.profiles[randInt(0, 5)];
 
-  res.send({ game: userById.game });
+  const userById = users.find((user) => (user.id === Number(req.params.id)));
+  userById.game = newGame;
+
+  res.send({ game: newGame });
+});
+
+router.post('/users/:id/game/guess', (req, res) => {
+  const userById = users.find((user) => (user.id === Number(req.params.id)));
+  if (req.body.guess === userById.game.answer.firstName + ' ' + userById.game.answer.lastName) {
+    userById.numWins++;
+    res.send({ correct: true });
+  } else {
+    res.send({ correct: false });
+  }
 });
 
 function getProfiles() {
   let randProfiles = [];
-  for (let i = 0; i < 6; i++) {
-    randProfiles.push(data.profiles[randInt(0, data.profiles.length - 1)]);
+  let set = new Set();
+  let i = 0;
+  while (i !== 6) {
+    let randomNum = randInt(0, data.profiles.length - 1);
+    // only add profile if its not a duplicate and it has a headshot url
+    if (!set.has(randomNum) && data.profiles[randomNum].headshot.url) {
+      randProfiles.push(data.profiles[randomNum]);
+      set.add(randomNum);
+      i++;
+    }
   }
   return randProfiles;
 }

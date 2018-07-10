@@ -4,14 +4,17 @@
         <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
     </head>
     <body>
-        Enter Username:
-        <input id="nameinput" type="text" />
-        <button id="namebtn">Submit</button>
+        <div id="user">
+            Enter Username:
+            <input id="nameinput" type="text" />
+            <button id="namebtn">Submit</button>
+        </div>
         
         <div id="game"></div>
 
 <script type="text/javascript">
     var userId;
+    var game;
     $('#namebtn').on('click', startGame);
     function startGame() {
         var name = $('#nameinput').val();
@@ -20,7 +23,13 @@
             userId = response.data.user.id;
             console.log(userId);
             axios.post('/api/users/' + userId + '/game').then(function (response) {
-                console.log(response);
+                game = response.data.game;
+                $('#user').empty();
+                renderGame();
+            })
+            .catch(function (error) {
+                console.log('error');
+                console.log(error);
             });
         })
         .catch(function (error) {
@@ -29,8 +38,33 @@
         });
     }
 
-    function renderGame(profiles) {
-        
+    function renderGame() {
+        $('#game').empty();
+        $('#game').append(
+            '<div id="answer">' + 
+                'Which picture is ' + game.answer.firstName + ' ' + game.answer.lastName + '?'
+            + '</div>'
+        );
+        let i = 0;
+        game.profiles.forEach(function (profile) {
+            var url = profile.headshot.url;
+            $('#game').append(
+                '<img id="' + i + '"src="' + url + '" width="320" height="320" onclick="guess(this)" />'
+            );
+            i++;
+        });
+    }
+    
+    function guess(img) {
+        var guess = game.profiles[Number(img.id)].firstName + ' ' + game.profiles[Number(img.id)].lastName;
+        console.log(guess);
+        axios.post('/api/users/' + userId + '/game/guess', { guess: guess })
+        .then(function (response) {
+            console.log(response.data);
+        }).catch(function (error) {
+            console.log('error');
+            console.log(error);
+        });
     }
 </script>
 
