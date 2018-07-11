@@ -30,6 +30,15 @@ router.get('/stats', (req, res) => {
   res.send({ stats: allStats });
 });
 
+router.get('/stats/:id', (req, res) => {
+  const statsByUser = users.find((user) => (user.id === Number(req.params.id))).stats;
+  if (statsByUser) {
+    res.send({ stats: statsByUser });
+  } else {
+    res.sendStatus(404);
+  }
+});
+
 // return all stats of users sorted and trimmed by type
 function trimAndSort(users, type, sort) {
   // map of types to corresponding stat variable names
@@ -48,14 +57,5 @@ function trimAndSort(users, type, sort) {
   }
   return allStats;
 }
-
-router.get('/stats/:id', (req, res) => {
-  const statsByUser = users.find((user) => (user.id === Number(req.params.id))).stats;
-  if (statsByUser) {
-    res.send({ stats: statsByUser });
-  } else {
-    res.sendStatus(404);
-  }
-});
 
 module.exports = router;

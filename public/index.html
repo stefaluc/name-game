@@ -41,7 +41,7 @@
     }
 
     function createGame() {
-        axios.post('/api/users/' + userId + '/game').then(function (res) {
+        axios.post('/api/users/' + userId + '/games').then(function (res) {
             game = res.data.game;
             $('#user').empty();
             renderGame();
@@ -73,7 +73,7 @@
     function guess(img) {
         var guess = game.profiles[Number(img.id)].firstName + ' ' + game.profiles[Number(img.id)].lastName;
         console.log(guess);
-        axios.post('/api/users/' + userId + '/game?guess=' + guess)
+        axios.post('/api/users/' + userId + '/games?guess=' + guess)
         .then(function (res) {
             console.log(res.data);
             if (res.data.correct) {
@@ -99,10 +99,15 @@
         });
     }
 
-    function renderLB() {
+    function renderLB(type) {
         axios.get('/api/stats').then(function (res) {
             const stats = res.data.stats;
             $('#leaderboard').empty();
+            $('#leaderboard').append(
+                '<div>Correct Guesses: ' + stats.correctGuesses + '</div>' +
+                '<div>Wrong Guesses: ' + stats.wrongGuesses + '</div>' +
+                '<div>Average finish time: ' + stats.avgFinishTime + '</div>'
+            );
             $('#leaderboard').append(
                 '<div>Correct Guesses: ' + stats.correctGuesses + '</div>' +
                 '<div>Wrong Guesses: ' + stats.wrongGuesses + '</div>' +

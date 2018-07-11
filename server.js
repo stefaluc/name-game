@@ -6,6 +6,7 @@ const index = require('./routes/index');
 const users = require('./routes/users');
 const games = require('./routes/games');
 const stats = require('./routes/stats');
+const profiles = require('./routes/profiles');
 
 const app = express();
 const port = process.env.PORT || 8080;
@@ -18,5 +19,6 @@ app.use('/', index);
 app.use('/api/', users);
 app.use('/api/', games);
 app.use('/api/', stats);
+app.use('/api/', profiles);
 
 app.listen(port, () => console.log(`Listening on port ${port}`));

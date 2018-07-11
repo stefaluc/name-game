@@ -47,9 +47,9 @@ router.post('/users', (req, res) => {
   }
 });
 
-// ========== User game HTTP requests (/users/:id/game) ==========
+// ========== User game HTTP requests (/users/:id/games) ==========
 // GET game session for a user
-router.get('/users/:id/game', (req, res) => {
+router.get('/users/:id/games', (req, res) => {
   const userById = users.find((user) => (user.id === Number(req.params.id)));
   if (userById) {
     res.send({ game: userById.game });
@@ -59,12 +59,12 @@ router.get('/users/:id/game', (req, res) => {
 });
 
 // POST new game session for user, or process user guess for a game
-router.post('/users/:id/game', (req, res) => {
+router.post('/users/:id/games', (req, res) => {
   const userById = users.find((user) => (user.id === Number(req.params.id)));
   if (userById) {
     if (!req.query.guess) { // create new game
       const newGame = {
-        profiles: getProfiles(),
+        profiles: getRandProfiles(),
         gameStartTime: Date.now(),
       };
       newGame.answer = newGame.profiles[randInt(0, 5)];
@@ -94,8 +94,19 @@ router.post('/users/:id/game', (req, res) => {
   }
 });
 
+// ========== User stats HTTP requests (/users/:id/stats) ==========
+router.get('/users/:id/stats', (req, res) => {
+  const statsByUser = users.find((user) => (user.id === Number(req.params.id))).stats;
+  if (statsByUser) {
+    res.send({ stats: statsByUser });
+  } else {
+    // user not found
+    res.sendStatus(404);
+  }
+})
+
 // get six random profiles from data
-function getProfiles() {
+function getRandProfiles() {
   let randProfiles = [];
   let set = new Set();
   let i = 0;
