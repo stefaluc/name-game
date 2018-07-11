@@ -30,6 +30,7 @@ router.get('/stats', (req, res) => {
   res.send({ stats: allStats });
 });
 
+// GET stats for a certain user
 router.get('/stats/:id', (req, res) => {
   const statsByUser = users.find((user) => (user.id === Number(req.params.id))).stats;
   if (statsByUser) {

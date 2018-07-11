@@ -88,10 +88,9 @@ router.post('/users/:id/games', (req, res) => {
         // assign accuracy (ratio) and avoid divide by 0
         stats.accuracy = (stats.wrongGuesses) ?
           stats.correctGuesses / stats.wrongGuesses : stats.correctGuesses;
-        console.log(stats.accuracy);
 
         res.send({ correct: true, finishTime });
-      } else {
+      } else { // incorrect answer
         stats.wrongGuesses++;
         stats.accuracy = stats.correctGuesses / stats.wrongGuesses;
 

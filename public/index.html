@@ -28,6 +28,7 @@
     $('#statsbtn').on('click', renderStats);
     $('#lbbtn').on('click', renderLB);
 
+    // POST new user and create game
     function login() {
         var name = $('#nameinput').val();
         axios.post('/api/users', { name: name }).then(function (res) {
@@ -40,6 +41,7 @@
         });
     }
 
+    // POST a new game for user and set object
     function createGame() {
         axios.post('/api/users/' + userId + '/games').then(function (res) {
             game = res.data.game;
@@ -52,6 +54,7 @@
         });
     }
 
+    // render ui for a game
     function renderGame() {
         $('#game').empty();
         $('#game').append(
@@ -70,6 +73,7 @@
         $('#game').append('<div id="correct"></div>');
     }
     
+    // POST guess, display incorrect if wrong, else start new game
     function guess(img) {
         var guess = game.profiles[Number(img.id)].firstName + ' ' + game.profiles[Number(img.id)].lastName;
         axios.post('/api/users/' + userId + '/games?guess=' + guess)
@@ -85,6 +89,7 @@
         });
     }
 
+    // GET user stats and render ui
     function renderStats() {
         axios.get('/api/stats/' + userId).then(function (res) {
             const stats = res.data.stats;
@@ -97,6 +102,7 @@
         });
     }
 
+    // GET leaderboard stats and render ui
     function renderLB(type) {
         if (String(typeof type) == 'object') { type = 'accuracy'; } // default to accuracy
         console.log(String(typeof type));
