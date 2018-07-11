@@ -11,7 +11,7 @@ router.get('/stats', (req, res) => {
   let allStats = users.map((user) => ({ id: user.id, name: user.name, stats: user.stats }));
   if (req.query.type) {
     switch (req.query.type) {
-      // for each case, trim stats to only the type and sort (default ascending) by that type
+      // for each case, trim stats to only the type and sort (default descending) by that type
       case 'accuracy':
         allStats = trimAndSort(users, 'accuracy', req.query.sort);
         break;
@@ -35,27 +35,29 @@ router.get('/stats/:id', (req, res) => {
   if (statsByUser) {
     res.send({ stats: statsByUser });
   } else {
+    // user not found
     res.sendStatus(404);
   }
 });
 
 // return all stats of users sorted and trimmed by type
 function trimAndSort(users, type, sort) {
+  // TODO: update so default isn't always descending, but whatever order puts best player first
   // map of types to corresponding stat variable names
   const map = {
-    accuracy: 'test',
+    accuracy: 'accuracy',
     speed: 'avgFinishTime',
     amount: 'correctGuesses',
   }
-  let allStats = users.map((user) =>
+  let statsByType = users.map((user) =>
     ({ id: user.id, name: user.name, stats: user.stats[map[type]] })
   );
-  if (sort === 'descending') {
-    allStats.sort((a, b) => (b[map[type]] - a[map[type]]));
+  if (sort === 'ascending') {
+    statsByType.sort((a, b) => (a.stats - b.stats));
   } else {
-    allStats.sort((a, b) => (a[map[type]] - b[map[type]]));
+    statsByType.sort((a, b) => (b.stats - a.stats));
   }
-  return allStats;
+  return statsByType;
 }
 
 module.exports = router;

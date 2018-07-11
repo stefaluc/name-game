@@ -72,10 +72,8 @@
     
     function guess(img) {
         var guess = game.profiles[Number(img.id)].firstName + ' ' + game.profiles[Number(img.id)].lastName;
-        console.log(guess);
         axios.post('/api/users/' + userId + '/games?guess=' + guess)
         .then(function (res) {
-            console.log(res.data);
             if (res.data.correct) {
                 createGame();
             } else {
@@ -100,18 +98,32 @@
     }
 
     function renderLB(type) {
-        axios.get('/api/stats').then(function (res) {
+        if (String(typeof type) == 'object') { type = 'accuracy'; } // default to accuracy
+        console.log(String(typeof type));
+        axios.get('/api/stats?type=' + type + '&limit=10').then(function (res) {
             const stats = res.data.stats;
+            console.log(stats);
             $('#leaderboard').empty();
+            $('#leaderboard').append('<div>Top ten users by ' + type + '</div>');
+            for (var i = 0; i < stats.length; i++) {
+                $('#leaderboard').append(
+                    '<div>User: ' + stats[i].name + '   Score: ' + stats[i].stats + '</div>'
+                );
+            }
             $('#leaderboard').append(
-                '<div>Correct Guesses: ' + stats.correctGuesses + '</div>' +
-                '<div>Wrong Guesses: ' + stats.wrongGuesses + '</div>' +
-                '<div>Average finish time: ' + stats.avgFinishTime + '</div>'
+                '<div id="lbbtn" style="color: blue; cursor: pointer; text-decoration: underline" onclick=renderLB("accuracy")>' +
+                    'View top players by accuracy' +
+                '</div>'
             );
             $('#leaderboard').append(
-                '<div>Correct Guesses: ' + stats.correctGuesses + '</div>' +
-                '<div>Wrong Guesses: ' + stats.wrongGuesses + '</div>' +
-                '<div>Average finish time: ' + stats.avgFinishTime + '</div>'
+                '<div id="lbbtn" style="color: blue; cursor: pointer; text-decoration: underline" onclick=renderLB("speed")>' +
+                    'View top players by speed' +
+                '</div>'
+            );
+            $('#leaderboard').append(
+                '<div id="lbbtn" style="color: blue; cursor: pointer; text-decoration: underline" onclick=renderLB("amount")>' +
+                    'View top players by amount' +
+                '</div>'
             );
         });
     }

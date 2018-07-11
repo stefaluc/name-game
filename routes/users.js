@@ -1,6 +1,6 @@
 const express = require('express');
 
-const data = require('../data/profiles');
+const profileData = require('../data/profiles');
 const userData = require('../data/users');
 
 const router = express.Router();
@@ -37,6 +37,7 @@ router.post('/users', (req, res) => {
         wrongGuesses: 0,
         timeSpent: 0,
         avgFinishTime: 0,
+        accuracy: 0,
       },
     };
     users.push(newUser);
@@ -73,18 +74,26 @@ router.post('/users/:id/games', (req, res) => {
 
       res.send({ game: newGame });
     } else { // guess submitted
-      let correctAnswer = userById.game.answer.firstName + ' ' + userById.game.answer.lastName;
+      let stats = userById.stats;
+      let game = userById.game
+      let correctAnswer = game.answer.firstName + ' ' + game.answer.lastName;
+      // update statistics for users based on correct/incorrect answer
       if (req.query.guess === correctAnswer) {
-        userById.stats.correctGuesses++;
+        stats.correctGuesses++;
         // get time it took for user to guess correctly and update avg
         let finishTime = (new Date(
-          new Date(Date.now() - new Date(userById.game.gameStartTime)))).getUTCSeconds();
-        userById.stats.timeSpent += finishTime;
-        userById.stats.avgFinishTime = userById.stats.timeSpent / userById.stats.correctGuesses;
+          new Date(Date.now() - new Date(game.gameStartTime)))).getUTCSeconds();
+        stats.timeSpent += finishTime;
+        stats.avgFinishTime = stats.timeSpent / stats.correctGuesses;
+        // assign accuracy (ratio) and avoid divide by 0
+        stats.accuracy = (stats.wrongGuesses) ?
+          stats.correctGuesses / stats.wrongGuesses : stats.correctGuesses;
+        console.log(stats.accuracy);
 
         res.send({ correct: true, finishTime });
       } else {
-        userById.stats.wrongGuesses++;
+        stats.wrongGuesses++;
+        stats.accuracy = stats.correctGuesses / stats.wrongGuesses;
 
         res.send({ correct: false });
       }
@@ -111,10 +120,10 @@ function getRandProfiles() {
   let set = new Set();
   let i = 0;
   while (i !== 6) {
-    let randomNum = randInt(0, data.profiles.length - 1);
+    let randomNum = randInt(0, profileData.profiles.length - 1);
     // only add profile if its not a duplicate and it has a headshot url
-    if (!set.has(randomNum) && data.profiles[randomNum].headshot.url) {
-      randProfiles.push(data.profiles[randomNum]);
+    if (!set.has(randomNum) && profileData.profiles[randomNum].headshot.url) {
+      randProfiles.push(profileData.profiles[randomNum]);
       set.add(randomNum);
       i++;
     }
